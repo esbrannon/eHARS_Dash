@@ -3,10 +3,12 @@ This is a data dashboard created for eHARS, the Enhanced HIV/AIDS Reporting Syst
 
 # Shiny Apps
 If you visit the eHARS Dash through Shiny Apps, please do so very briefly. I currently have a free account which allows for 25 hours of viewing/month. The eHARS Dash on Shiny Apps uses fictional data and isn’t designed to be realistic. The code can be downloaded from github and run locally and I have included code to create a fictional dataset.
+
 !!! Read above before visiting !!!
- http://esbrannon.shinyapps.io/eHARS_Dash
+
+http://esbrannon.shinyapps.io/eHARS_Dash
 
 ## About the Author
-I worked as the Perinatal Surveillance Supervisor at the STD/HIV Program in Louisiana for a couple of years and after repeatedly running the same analysis, I thought there should be a better way. I began learning R and Shiny and developing an eHARS data dashboard 
+I worked as the Perinatal Surveillance Supervisor at the STD/HIV Program in Louisiana for a couple of years and after repeatedly running the same analysis, I thought there should be a better way. I began learning R and Shiny and developing an eHARS data dashboard.
 
-Please contact me if there are additional requests
+Please contact me if there are additional requests.
