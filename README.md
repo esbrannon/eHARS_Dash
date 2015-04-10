@@ -7,8 +7,3 @@ If you visit the eHARS Dash through Shiny Apps, please do so very briefly. I cur
 !!! Read above before visiting !!!
 
 http://esbrannon.shinyapps.io/eHARS_Dash
-
-## About the Author
-I worked as the Perinatal Surveillance Supervisor at the STD/HIV Program in Louisiana for a couple of years and after repeatedly running the same analysis, I thought there should be a better way. I began learning R and Shiny and developing an eHARS data dashboard.
-
-Please contact me if there are additional requests.
