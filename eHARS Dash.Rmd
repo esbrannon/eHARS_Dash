@@ -135,8 +135,12 @@ shinyUI(
 
 
 aggdata2 <- function(varlst, years){
-  data0 = ehars[which(ehars$race %in% input$race_chkbx & ehars$age_cat %in% input$age_cat_chkbx &
-                        ehars$trans_categ %in% input$trans_categ_chkbx),]
+  varlst_chk <- paste(paste("ehars$", paste(varlst[3:length(varlst)], sep=""), 
+                            " %in%", sep = ""),  paste("input$", 
+                            paste(varlst[3:length(varlst)], sep=""), 
+                            "_chkbx & ", sep=""), collapse="")
+  varlst_chk <- paste("which(", substr(varlst_chk,1,(nchar(varlst_chk)-3)),")", sep="")
+  data0 = ehars[eval(parse(text=varlst_chk)),]
   data = data0[varlst]
   varlst2 <- paste("list(", paste("data$", varlst[2:length(varlst)], collapse=", ", sep=""), ")", sep="")
   data2 <- aggregate(data$count, by=eval(parse(text=varlst2)), FUN=sum)
@@ -147,10 +151,11 @@ aggdata2 <- function(varlst, years){
 
 
 data3 <- reactive({
-  vars = c("count", "yr_hiv","race", "age_cat", "trans_categ", "birth_sex")
-  vars = vars[!is.na(vars)]
-  data <- aggdata2(vars, c(input$year1, input$year2)) 
-  data$colgroup <- paste(data$race, data$age_cat, data$trans_categ)
+  varlst = c("count", "yr_hiv","race", "age_cat", "trans_categ", "birth_sex")
+  varlst = varlst[!is.na(varlst)]
+  data <- aggdata2(varlst, c(input$year1, input$year2))
+  varlst_col <- paste("paste(",paste("data$", paste(varlst[3:length(varlst)], sep=""), sep="", collapse=", "), ")", sep="" )
+  data$colgroup <- eval(parse(text=varlst_col))
   data
   })
 
