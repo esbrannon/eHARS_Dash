@@ -190,6 +190,126 @@ shinyUI(
   )
 
 
+varlst <- c("none", "race","age_cat", "trans_categ","birth_sex")
+
+
+                
+
+#selectInput("var_1", label = "Primary Variable:", choices = varlst)
+
+observe({
+  if(input$selectall == 0) return(NULL) 
+  else if (input$selectall%%2 == 0) {
+    updateCheckboxGroupInput(session,"variables2",paste("Choose",input$var_1),choices=outVar())
+    } else {
+      updateCheckboxGroupInput(session,"variables2",paste("Choose",input$var_1),
+                               choices=outVar(),selected=outVar())
+      }
+  
+  if(input$selectall2 == 0) return(NULL) 
+  else if (input$selectall2%%2 == 0) {
+    updateCheckboxGroupInput(session,"variables3",paste("Choose",input$var_2),choices=outVar3())
+    } else {
+      updateCheckboxGroupInput(session,"variables3",paste("Choose",input$var_2),
+                               choices=outVar3(),selected=outVar3())
+    }
+  })
+
+
+outVar <- reactive({
+  vars <- sort(unique(as.vector(ehars[[input$var_1]][ehars[[input$var_1]] != ''])))
+  return(vars)
+  })
+
+output$variables = renderUI({
+      if(!is.null(outVar())){ inputPanel(
+      actionLink("selectall","Select All"),
+      checkboxGroupInput('variables2', paste("Choose",input$var_1), outVar()))}})
+
+observe({
+  if(input$selectall == 0) return(NULL) 
+  else if (input$selectall%%2 == 0) {
+    updateCheckboxGroupInput(session,"variables2",paste("Choose",input$var_1),choices=outVar())
+    } else {
+      updateCheckboxGroupInput(session,"variables2",paste("Choose",input$var_1),
+                               choices=outVar(),selected=outVar())
+      }
+  
+  if(input$selectall2 == 0) return(NULL) 
+  else if (input$selectall2%%2 == 0) {
+    updateCheckboxGroupInput(session,"variables3",paste("Choose",input$var_2),choices=outVar3())
+    } else {
+      updateCheckboxGroupInput(session,"variables3",paste("Choose",input$var_2),
+                               choices=outVar3(),selected=outVar3())
+    }
+  })
+
+outVar2 <- reactive({
+  vars <- unique(c("none",varlst[!(varlst %in% input$var_1)]))
+  return(vars)
+  })
+
+output$variables2 = renderUI({
+  selectInput("var_2", label = "Secondary Variable:",
+              choices = outVar2()) 
+  })
+
+
+
+outVar3 <- reactive({
+  vars <- sort(unique(as.vector(ehars[[input$var_2]][ehars[[input$var_2]] != ''])))
+  return(vars)
+  })
+
+output$variables3 = renderUI({
+  if(!is.null(outVar3())){inputPanel(
+    actionLink("selectall2","Select All"),
+    checkboxGroupInput('variables3', paste("Choose",input$var_2), outVar3()))
+    }
+  })
+
+
+#sort(unique(as.vector(ehars[[input$var_1]][ehars[[input$var_1]] != ''])))
+aggdata3 <- function(varlst, years){
+  data0 = ehars[which(ehars[[input$var_1]] %in% input$variables2 & ehars[[input$var_2]] %in% input$variables3),]
+  data = data0[varlst]
+  varlst2 <- paste("list(", paste("data$", varlst[2:length(varlst)], collapse=", ", sep=""), ")", sep="")
+  data2 <- aggregate(data$count, by=eval(parse(text=varlst2)), FUN=sum)
+  names(data2) = c(varlst[2:length(varlst)], varlst[1])
+  data3 <- subset(data2, data2[1]>=years[1] & data2[1]<=years[2])
+  return(data3)
+}
+
+
+data4 <- reactive({
+  varlst = c("count", "yr_hiv", "age_cat","race")
+  varlst = varlst[!is.na(varlst)]
+  data <- aggdata3(varlst, c(input$year1, input$year2))
+  varlst_col <- paste("paste(",paste("data$", paste(varlst[3:length(varlst)], sep=""), sep="", collapse=", "), ")", sep="" )
+  data$colgroup <- eval(parse(text=varlst_col))
+  data
+  })
+
+plot4 <- reactive({
+        qplot(yr_hiv, count, data = data4(), color = data4()$colgroup )})
+
+            
+shinyUI(  
+  fluidPage(
+    titlePanel("New HIV Diagnoses in Louisiana"),
+          inputPanel(
+            selectInput("var_1", label = "Primary Variable:", choices = varlst),
+            uiOutput('variables'),
+            uiOutput('variables2'),
+            uiOutput('variables3')
+
+          ),
+    renderPlot(plot4(), width = 1000)
+        )
+    )
+  
+
+              
 ```
 
 
