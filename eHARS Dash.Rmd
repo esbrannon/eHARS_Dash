@@ -10,38 +10,40 @@ runtime: shiny
 require(ggplot2)
 
 # Access data on shiny server:
-#setwd("/srv/connect/apps/eHARS_Dash/")
+setwd("/srv/connect/apps/eHARS_Dash/")
 
 #Access data locally:
-setwd("C:/Users/elliott/Documents/R/eHARS Dash/")
+#setwd("I:/PUBLIC/PEDS/R Programs/eHars_Dash/")
 
 if(file.exists("./data/ehars.Rda")){
   load("./data/ehars.Rda")
   } else {
     source("./code/import.R")
     eharsdata(".data/ehars.Rda")
+    # eharsdata(".data/ehars.Rda", 'O:/DATA_OUT/LA00/Person/person.csv')
+
   }
 
 
 varlst <- c("none", "race","age_cat", "trans_categ","birth_sex")
    
-observe({
-  if(input$selectall == 0) return(NULL) 
-  else if (input$selectall%%2 == 0) {
-    updateCheckboxGroupInput(session,"variables2",paste("Choose",input$var_1),choices=outVar())
-    } else {
-      updateCheckboxGroupInput(session,"variables2",paste("Choose",input$var_1),
-                               choices=outVar(),selected=outVar())
-      }
-  
-  if(input$selectall2 == 0) return(NULL) 
-  else if (input$selectall2%%2 == 0) {
-    updateCheckboxGroupInput(session,"variables3",paste("Choose",input$var_2),choices=outVar3())
-    } else {
-      updateCheckboxGroupInput(session,"variables3",paste("Choose",input$var_2),
-                               choices=outVar3(),selected=outVar3())
-    }
-  })
+# observe({
+#   if(!is.null(input$selectall) && input$selectall == 0) return(NULL) 
+#   else if (!is.null(input$selectall) && input$selectall%%2 == 0 && !is.null(input$var_1) && !is.null(outVar())) {
+#     updateCheckboxGroupInput(session,"variables2",paste("Choose",input$var_1),choices=outVar())
+#     } else { if (!is.null(input$var_1) && !is.null(outVar())) {
+#       updateCheckboxGroupInput(session,"variables2",paste("Choose",input$var_1),
+#                                choices=outVar(),selected=outVar())
+#       }}
+#   
+#   if(!is.null(input$selectall2) &&  input$selectall2 == 0) return(NULL) 
+#   else if (input$selectall2%%2 == 0) {
+#     updateCheckboxGroupInput(session,"variables3",paste("Choose",input$var_2),choices=outVar3())
+#     } else {
+#       updateCheckboxGroupInput(session,"variables3",paste("Choose",input$var_2),
+#                                choices=outVar3(),selected=outVar3())
+#     }
+#   })
 
 outVar <- reactive({
   vars <- sort(unique(as.vector(ehars[[input$var_1]][ehars[[input$var_1]] != ''])))
@@ -129,7 +131,7 @@ output$downloadData <- downloadHandler(
             
 shinyUI(  
   fluidPage(
-    titlePanel("New HIV Diagnoses in Louisiana"),
+    titlePanel("HIV Diagnoses, AIDS Diagnoses, HIV/AIDS Deaths in Louisiana - Ficitonal Data"),
           inputPanel(
             selectInput("var1", label = "Choose Variable:",
               choices = c("yr_hiv", "yr_aids", "yr_death")),
