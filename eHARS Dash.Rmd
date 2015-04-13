@@ -99,17 +99,17 @@ data5 <- reactive({
   if(length(input$variables3)==0) varlst[4] = "none"
   varlst = varlst[!(varlst %in% "none")]
   
-  if(length(input$variables2) > 0 & length(input$variables3) > 0) {
+  if(length(input$variables2) > 0 & length(input$variables3) > 0 & !(input$var_1 == "none") & !(input$var_2 == "none")) {
       data = ehars[which(ehars[[input$var_1]] %in% input$variables2 & ehars[[input$var_2]] %in% input$variables3),]
       data2 <- aggregate(data$count, by=list(data[[input$var1]],data[[input$var_1]],data[[input$var_2]]), FUN=sum)
       data2$colgroup <- paste(data2[['Group.2']],data2[['Group.3']])
   } else {
-    if(length(input$variables2)> 0) {
+    if(length(input$variables2)> 0 & !(input$var_1 == "none")) {
       data = ehars[which(ehars[[input$var_1]] %in% input$variables2),]
       data2 <- aggregate(data$count, by=list(data[[input$var1]],data[[input$var_1]]), FUN=sum)
       data2$colgroup <- data2[['Group.2']]
       } else {
-        if(length(input$variables3)> 0) {
+        if(length(input$variables3)> 0 & !(input$var_2 == "none")) {
           data = ehars[which(ehars[[input$var_2]] %in% input$variables3),]
           data2 <- aggregate(data$count, by=list(data[[input$var1]],data[[input$var_2]]), FUN=sum)
           data2$colgroup <- data2[['Group.2']]
@@ -134,6 +134,14 @@ plot4 <- reactive({
   if(length(names(data5()))>3) qplot(data5()[[input$var1]], count, data = data5(), color = data5()$colgroup )
   else qplot(data5()[[input$var1]], count, data = data5())
         })
+
+
+output$downloadData <- downloadHandler(
+    filename = function() { 'data.csv' },
+    content = function(file) {
+      write.csv(data5(), file)
+    }
+  )
             
 shinyUI(  
   fluidPage(
@@ -150,16 +158,17 @@ shinyUI(
             uiOutput('variables'),
             uiOutput('variables2'),
             uiOutput('variables3')
-
           ),    
           tabsetPanel(
              tabPanel('plot',     renderPlot(plot4(), width = 1000)),
-             tabPanel('table', renderDataTable({ data5() }, options = list(paging = FALSE, searching=FALSE)))
+             tabPanel('table', renderDataTable({ data5() }, options = list(paging = FALSE, searching=FALSE))),
+             tabPanel('download', downloadButton('downloadData', 'Download data'))
+)
              )
    
 
         )
-    )
+    
   
               
 ```
