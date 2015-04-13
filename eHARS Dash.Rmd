@@ -19,7 +19,7 @@ if(file.exists("./data/ehars.Rda")){
   load("./data/ehars.Rda")
   } else {
     source("./code/import.R")
-    eharsdata("I:/PUBLIC/PEDS/R Programs/eHARS Dash/ehars.Rda")
+    eharsdata(".data/ehars.Rda")
   }
 
 
@@ -53,24 +53,6 @@ output$variables = renderUI({
       actionLink("selectall","Select All/None"),
       checkboxGroupInput('variables2', paste("Choose",input$var_1), selected=NULL, outVar()))}})
 
-observe({
-  if(input$selectall == 0) return(NULL) 
-  else if (input$selectall%%2 == 0) {
-    updateCheckboxGroupInput(session,"variables2",paste("Choose",input$var_1),choices=outVar())
-    } else {
-      updateCheckboxGroupInput(session,"variables2",paste("Choose",input$var_1),
-                               choices=outVar(),selected=outVar())
-      }
-  
-  if(input$selectall2 == 0) return(NULL) 
-  else if (input$selectall2%%2 == 0) {
-    updateCheckboxGroupInput(session,"variables3",paste("Choose",input$var_2),choices=outVar3())
-    } else {
-      updateCheckboxGroupInput(session,"variables3",paste("Choose",input$var_2),
-                               choices=outVar3(),selected=outVar3())
-    }
-  })
-
 outVar2 <- reactive({
   vars <- unique(c("none",varlst[!(varlst %in% input$var_1)]))
   return(vars)
@@ -82,7 +64,7 @@ output$variables2 = renderUI({
   })
 
 outVar3 <- reactive({
-  vars <- sort(unique(as.vector(ehars[[input$var_2]][ehars[[input$var_2]] != ''])))
+  vars <- if(!is.null(input$var_2)) sort(unique(as.vector(ehars[[input$var_2]][ehars[[input$var_2]] != ''])))
   return(vars)
   })
 
@@ -99,17 +81,18 @@ data5 <- reactive({
   if(length(input$variables3)==0) varlst[4] = "none"
   varlst = varlst[!(varlst %in% "none")]
   
-  if(length(input$variables2) > 0 & length(input$variables3) > 0 & !(input$var_1 == "none") & !(input$var_2 == "none")) {
-      data = ehars[which(ehars[[input$var_1]] %in% input$variables2 & ehars[[input$var_2]] %in% input$variables3),]
+  if(!is.null(input$variables2) && !is.null(input$variables3) && !is.null(input$var_1) && !is.null(input$var_2)
+     && length(input$variables2) && length(input$variables3) > 0  && !(input$var_1 == "none") && !(input$var_2 == "none")) {
+    data = ehars[which(ehars[[input$var_1]] %in% input$variables2 & ehars[[input$var_2]] %in% input$variables3),]
       data2 <- aggregate(data$count, by=list(data[[input$var1]],data[[input$var_1]],data[[input$var_2]]), FUN=sum)
       data2$colgroup <- paste(data2[['Group.2']],data2[['Group.3']])
   } else {
-    if(length(input$variables2)> 0 & !(input$var_1 == "none")) {
+    if(!is.null(input$variables2) && length(input$variables2) > 0 && !is.null(input$var_1) && !(input$var_1 == "none")) {
       data = ehars[which(ehars[[input$var_1]] %in% input$variables2),]
       data2 <- aggregate(data$count, by=list(data[[input$var1]],data[[input$var_1]]), FUN=sum)
       data2$colgroup <- data2[['Group.2']]
       } else {
-        if(length(input$variables3)> 0 & !(input$var_2 == "none")) {
+        if(!is.null(input$variables3) && length(input$variables3) > 0 && !is.null(input$var_2) && !(input$var_2 == "none")) {
           data = ehars[which(ehars[[input$var_2]] %in% input$variables3),]
           data2 <- aggregate(data$count, by=list(data[[input$var1]],data[[input$var_2]]), FUN=sum)
           data2$colgroup <- data2[['Group.2']]
@@ -126,6 +109,7 @@ else names(data2)[length(names(data2))] <- "count"
 
 
   data3 <- subset(data2, data2[1]>=input$year1 & data2[1]<=input$year2)
+
   data3
   
 })
@@ -153,7 +137,6 @@ shinyUI(
               choices = c(1979:2013)),
             selectInput("year2", label = "End Year:",
               choices = c(1979:2013),selected=2013),
-
             selectInput("var_1", label = "Primary Variable:", choices = varlst),
             uiOutput('variables'),
             uiOutput('variables2'),
@@ -171,177 +154,4 @@ shinyUI(
     
   
               
-```
-
-
-```{r echo=FALSE}
-
-
-
-# aggdata <- function(varlst, years){
-#   data = ehars[varlst]
-#   varlst2 <- paste("list(", paste("data$", varlst[2:length(varlst)], collapse=", ", sep=""), ")", sep="")
-#   data2 <- aggregate(data$count, by=eval(parse(text=varlst2)), FUN=sum)
-#   names(data2) = c(varlst[2:length(varlst)], varlst[1])
-#   data3 <- subset(data2, data2[1]>=years[1] & data2[1]<=years[2])
-#   return(data3)
-# }
-# 
-# data1 <- reactive({
-#   vars = c("count", input$var1, ifelse(input$race == TRUE, "race", NA), 
-#            ifelse(input$trans_categ == TRUE, "trans_categ", NA), 
-#            ifelse(input$age_cat == TRUE, "age_cat", NA), ifelse(input$birth_sex == TRUE, "birth_sex", NA))
-#   vars = vars[!is.na(vars)]
-#   data <- aggdata(vars, c(input$year1, input$year2)) 
-#   })
-# 
-# plot1 <- reactive({
-#     if(input$race == TRUE | input$trans_categ == TRUE | input$age_cat == TRUE | input$birth_sex == TRUE ){
-#       qplot(eval(parse(text=input$var1)), y = count, data = data1(), 
-#             color = eval(parse(text=names(data1()[1:length(names(data1()))-1]))))
-#       } else  {
-#         qplot(eval(parse(text=input$var1)), count, data = data1())}
-#     })
-# 
-# shinyUI(  
-#   fluidPage(
-#     titlePanel("HIV/AIDS in Louisiana"),
-#       sidebarLayout(
-#         sidebarPanel(
-#           inputPanel(
-#             selectInput("var1", label = "Choose Variable:",
-#               choices = c("yr_hiv", "yr_aids", "yr_death")),
-#             selectInput("year1", label = "Start Year:",
-#               choices = c(1979:2013)),
-#             selectInput("year2", label = "End Year:",
-#               choices = c(1979:2013),selected=2013),
-#             div(style = "margin-left: 20px",
-#                 checkboxInput("race", "Race", FALSE),
-#                 checkboxInput("trans_categ", "Transmission Type", FALSE),
-#                 checkboxInput("age_cat", "Age Category", FALSE),
-#                 checkboxInput("birth_sex", "Birth Sex", FALSE))
-#             )
-#           ),
-#         mainPanel(
-#           tabsetPanel(
-#             tabPanel('plot',renderPlot({ plot1() })),
-#             tabPanel('table', renderDataTable({ data1() }, options = list(paging = FALSE, searching=FALSE)))
-#             )
-#           )
-#         )
-#     )
-#   )
-# 
-
-```
-
-
-```{r echo=FALSE, warning=FALSE}
-# library(maps)
-#   data(county.fips)
-#   county.fips <- subset(county.fips, fips>22000 & fips<23000)
-# 
-# data2 <- reactive({
-#   vars = c("count", "yr_hiv", "cur_county_fips")
-#   data <- aggdata(vars, c(input$year, input$year)) 
-#   data$colorBuckets <- data$count
-#   data$cur_county_fips <- data$cur_county_fips + 22000
-#   #data$colorBuckets <- as.numeric(cut(data$count, c(0, 30, 60, 60, 80, 100, 120)))
-#   data$colorBuckets <- as.numeric(with(data, cut(data$count, 
-#                                 breaks=quantile(data$count, probs=seq(0,1, by=0.20)), 
-#                                 include.lowest=TRUE)))
-#   data
-#   })
-# 
-# plot2 <- reactive({
-#   datamap <- data2()
-#   colors = c("#F1EEF6", "#D4B9DA", "#C994C7", "#DF65B0", "#DD1C77", "#980043")
-#   colorsmatched <- datamap$colorBuckets[match(as.numeric(county.fips$fips), datamap$cur_county_fips)]
-#   map("county", col = colors[colorsmatched], fill = TRUE, region = "louisiana", myborder=c(.1,.1))
-#   title(paste("HIV Diagnoses,", input$year), line =2)
-# #leg.txt <- as.character(with(datamap, cut(datamap$count, 
-#             #                    breaks=quantile(datamap$count, probs=seq(0,1, by=0.20)), 
-#             #                    include.lowest=TRUE)))
-#             #legend("bottomright", leg.txt, horiz = TRUE, fill = colors)
-#             
-#   
-# })
-# 
-# shinyUI(fluidPage(
-#   titlePanel("Map of HIV"),
-#   sidebarLayout(
-#     sidebarPanel(
-#       inputPanel(
-#         selectInput("year", label = "Year:", choices = c(1979:2013)))
-#       ),
-#     mainPanel(
-#       tabsetPanel(
-#         tabPanel('map', renderPlot({ plot2() }, height = 600, width = 600)),
-#         tabPanel('table', renderDataTable({ data2() }, options = list(paging = FALSE, searching=FALSE)))
-#         )
-#       )
-#     )
-#   )
-#   )
-
-```
-
-
-```{r, echo=FALSE, warning=FALSE, message=FALSE}
-
-
-# aggdata2 <- function(varlst, years){
-#   varlst_chk <- paste(paste("ehars$", paste(varlst[3:length(varlst)], sep=""), 
-#                             " %in%", sep = ""),  paste("input$", 
-#                             paste(varlst[3:length(varlst)], sep=""), 
-#                             "_chkbx & ", sep=""), collapse="")
-#   varlst_chk <- paste("which(", substr(varlst_chk,1,(nchar(varlst_chk)-3)),")", sep="")
-#   data0 = ehars[eval(parse(text=varlst_chk)),]
-#   data = data0[varlst]
-#   varlst2 <- paste("list(", paste("data$", varlst[2:length(varlst)], collapse=", ", sep=""), ")", sep="")
-#   data2 <- aggregate(data$count, by=eval(parse(text=varlst2)), FUN=sum)
-#   names(data2) = c(varlst[2:length(varlst)], varlst[1])
-#   data3 <- subset(data2, data2[1]>=years[1] & data2[1]<=years[2])
-#   return(data3)
-# }
-# 
-# 
-# data3 <- reactive({
-#   varlst = c("count", "yr_hiv","race", "age_cat", "trans_categ", "birth_sex")
-#   varlst = varlst[!is.na(varlst)]
-#   data <- aggdata2(varlst, c(input$year1, input$year2))
-#   varlst_col <- paste("paste(",paste("data$", paste(varlst[3:length(varlst)], sep=""), sep="", collapse=", "), ")", sep="" )
-#   data$colgroup <- eval(parse(text=varlst_col))
-#   data
-#   })
-# 
-# plot3 <- reactive({
-#         qplot(yr_hiv, count, data = data3(), color = data3()$colgroup )})
-# 
-# shinyUI(  
-#   fluidPage(
-#     titlePanel("New HIV Diagnoses in Louisiana"),
-#       sidebarLayout(
-#         sidebarPanel(
-#           inputPanel(
-#             selectInput("year1", label = "Start Year:",
-#               choices = c(1979:2013)),
-#             selectInput("year2", label = "End Year:",
-#               choices = c(1979:2013),selected=2013),
-#             div(style = "margin-left: 20px", 
-#                 checkboxGroupInput("birth_sex_chkbx", label="", unique(ehars$birth_sex))),
-#             div(style = "margin-left: 20px",
-#                 checkboxGroupInput("race_chkbx", label="", unique(ehars$race))),
-#             div(style = "margin-left: 20px",
-#                 checkboxGroupInput("trans_categ_chkbx", label="", unique(ehars$trans_categ))),
-#             div(style = "margin-left: 20px",
-#                 checkboxGroupInput("age_cat_chkbx", label="", unique(ehars$age_cat))
-#             )
-#           )),
-#         mainPanel(
-#           renderPlot(plot3())
-#           )
-#         )
-#     )
-#   )
 ```
