@@ -2,18 +2,18 @@
 title: "eHARS Dash"
 author: "Elliott Brannon"
 date: "Monday, April 06, 2015"
-output: html_document
+output:
+  html_document:
+    css: /srv/connect/apps/eHARS_Dash/www/bootstrap.css
 runtime: shiny
 ---
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 require(ggplot2)
 
-# Access data on shiny server:
-setwd("/srv/connect/apps/eHARS_Dash/")
-
 #Access data locally:
-#setwd("I:/PUBLIC/PEDS/R Programs/eHars_Dash/")
+if (!(substr(getwd(),1,1) == "/") ) {setwd("I:/PUBLIC/PEDS/R Programs/eHars_Dash/")
+                                     } else setwd("/srv/connect/apps/eHARS_Dash/")
 
 if(file.exists("./data/ehars.Rda")){
   load("./data/ehars.Rda")
@@ -26,8 +26,10 @@ if(file.exists("./data/ehars.Rda")){
 
 
 varlst <- c("none", "race","age_cat", "trans_categ","birth_sex")
-   
+
+
 # observe({
+# 
 #   if(!is.null(input$selectall) && input$selectall == 0) return(NULL) 
 #   else if (!is.null(input$selectall) && input$selectall%%2 == 0 && !is.null(input$var_1) && !is.null(outVar())) {
 #     updateCheckboxGroupInput(session,"variables2",paste("Choose",input$var_1),choices=outVar())
@@ -43,7 +45,9 @@ varlst <- c("none", "race","age_cat", "trans_categ","birth_sex")
 #       updateCheckboxGroupInput(session,"variables3",paste("Choose",input$var_2),
 #                                choices=outVar3(),selected=outVar3())
 #     }
-#   })
+# }  
+# )
+
 
 outVar <- reactive({
   vars <- sort(unique(as.vector(ehars[[input$var_1]][ehars[[input$var_1]] != ''])))
@@ -128,17 +132,28 @@ output$downloadData <- downloadHandler(
       write.csv(data5(), file)
     }
   )
-            
+
+
 shinyUI(  
   fluidPage(
-    titlePanel("HIV Diagnoses, AIDS Diagnoses, HIV/AIDS Deaths in Louisiana - Ficitonal Data"),
+  tags$head(
+    tags$link(rel = "stylesheet", type = "text/css", href = "./www/bootstrap.css")),
+    tags$head(tags$style(HTML('
+     
+    .shiny-flow-layout > div {
+     width: 210px;
+      }
+    '))),
+    
+    headerPanel("HIV Diagnoses, AIDS Diagnoses, HIV/AIDS Deaths in Louisiana - Ficitonal Data"),
           inputPanel(
-            selectInput("var1", label = "Choose Variable:",
+     selectInput("var1", label = "Choose Variable:",
               choices = c("yr_hiv", "yr_aids", "yr_death")),
             selectInput("year1", label = "Start Year:",
               choices = c(1979:2013)),
             selectInput("year2", label = "End Year:",
               choices = c(1979:2013),selected=2013),
+            div(),
             selectInput("var_1", label = "Primary Variable:", choices = varlst),
             uiOutput('variables'),
             uiOutput('variables2'),
@@ -153,7 +168,7 @@ shinyUI(
    
 
         )
-    
-  
+
+
               
 ```
