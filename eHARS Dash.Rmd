@@ -18,7 +18,7 @@ if ((substr(getwd(),1,1) == "I") ) {
   setwd("I:/PUBLIC/PEDS/R Programs/eHars_Dash/")
   } else if ((substr(getwd(),1,1) == "C") ){
     setwd("C:/Users/elliott/My Documents/R/eHars_Dash/")
-    } else if((substr(getwed(),1,6) =="/srv/s") { setwd("/srv/shiny-server/eHARS_Dash/")
+    } else if((substr(getwd(),1,6) =="/srv/s")) { setwd("/srv/shiny-server/eHARS_Dash/")
       } else setwd("/srv/connect/apps/eHARS_Dash/")
 
 if(file.exists("./data/ehars.Rda")){
