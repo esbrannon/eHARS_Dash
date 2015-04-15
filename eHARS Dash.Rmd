@@ -3,17 +3,23 @@ title: "eHARS Dash"
 author: "Elliott Brannon"
 date: "Monday, April 06, 2015"
 output:
-  html_document:
-    css: /srv/connect/apps/eHARS_Dash/www/bootstrap.css
+  html_document: default
 runtime: shiny
 ---
+<style type="text/css">
+    .shiny-flow-layout > div { width: 210px;}
+</style>
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 require(ggplot2)
 
 #Access data locally:
-if (!(substr(getwd(),1,1) == "/") ) {setwd("I:/PUBLIC/PEDS/R Programs/eHars_Dash/")
-                                     } else setwd("/srv/connect/apps/eHARS_Dash/")
+if ((substr(getwd(),1,1) == "I") ) {
+  setwd("I:/PUBLIC/PEDS/R Programs/eHars_Dash/")
+  } else if ((substr(getwd(),1,1) == "C") ){
+    setwd("C:/Users/elliott/My Documents/R/eHars_Dash/")
+    } else if((substr(getwed(),1,6) =="/srv/s") { setwd("/srv/shiny-server/eHARS_Dash/")
+      } else setwd("/srv/connect/apps/eHARS_Dash/")
 
 if(file.exists("./data/ehars.Rda")){
   load("./data/ehars.Rda")
@@ -27,27 +33,27 @@ if(file.exists("./data/ehars.Rda")){
 
 varlst <- c("none", "race","age_cat", "trans_categ","birth_sex")
 
-
+# if(!is.null(input$var_1) && !is.null(outVar())) {
 # observe({
-# 
-#   if(!is.null(input$selectall) && input$selectall == 0) return(NULL) 
-#   else if (!is.null(input$selectall) && input$selectall%%2 == 0 && !is.null(input$var_1) && !is.null(outVar())) {
+#    if(input$selectall == 0) return(NULL) 
+#   else if (input$selectall%%2 == 0) {
 #     updateCheckboxGroupInput(session,"variables2",paste("Choose",input$var_1),choices=outVar())
-#     } else { if (!is.null(input$var_1) && !is.null(outVar())) {
+#     } else  {
 #       updateCheckboxGroupInput(session,"variables2",paste("Choose",input$var_1),
 #                                choices=outVar(),selected=outVar())
-#       }}
-#   
-#   if(!is.null(input$selectall2) &&  input$selectall2 == 0) return(NULL) 
+#       }
+# 
+# if(!is.null(input$selectall2) && !is.null(input$var_2) && !is.null(outVar3())){
+#   if(input$selectall2 == 0) return(NULL) 
 #   else if (input$selectall2%%2 == 0) {
 #     updateCheckboxGroupInput(session,"variables3",paste("Choose",input$var_2),choices=outVar3())
 #     } else {
 #       updateCheckboxGroupInput(session,"variables3",paste("Choose",input$var_2),
 #                                choices=outVar3(),selected=outVar3())
 #     }
-# }  
-# )
-
+# 
+# })
+# }
 
 outVar <- reactive({
   vars <- sort(unique(as.vector(ehars[[input$var_1]][ehars[[input$var_1]] != ''])))
@@ -121,8 +127,8 @@ else names(data2)[length(names(data2))] <- "count"
 })
 
 plot4 <- reactive({
-  if(length(names(data5()))>3) qplot(data5()[[input$var1]], count, data = data5(), color = data5()$colgroup )
-  else qplot(data5()[[input$var1]], count, data = data5())
+  if(length(names(data5()))>3) qplot(data5()[[input$var1]], count, data = data5(), color = data5()$colgroup, xlab=names(data5())[1])
+  else qplot(data5()[[input$var1]], count, data = data5(), xlab=names(data5())[1])
         })
 
 
