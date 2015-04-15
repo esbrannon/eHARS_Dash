@@ -11,7 +11,7 @@ runtime: shiny
 </style>
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
-require(ggplot2)
+library(ggplot2)
 getwd()
 #Access data locally:
 if ((substr(getwd(),1,1) == "I") ) {
